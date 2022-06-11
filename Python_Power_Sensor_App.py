@@ -1,6 +1,8 @@
+from turtle import update
 import pyvisa
 import webbrowser
 import random
+import time
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -9,7 +11,10 @@ from tkinter import *
 import tkinter
 from tkinter import filedialog
 
+readPower  = True
+bigTextVar = False
 
+updateTime = 750 #in milliseconds
 
 ################################
 #  START FUNCTION DEFINITIONS  #
@@ -44,12 +49,30 @@ def graph():
     plt.hist(house_prices, 500)
     plt.show()
 
+def startPowerReading():
+    readPower = True
+    print("True")
+
+def stopPowerReading():
+    readPower = False
+    print("False")
+
+def updatePowerDataDisp():
+    if readPower == True:
+        powerDataDisp['text'] = np.random.normal(0, 30, 1)
+        root.after(updateTime, updatePowerDataDisp) #run again automagically after a user specified time (in ms)
+    else:
+        root.after(updateTime, updatePowerDataDisp) #run again automagically after a user specified time (in ms)
+
+def bigText():
+    bigTextVar = not bigTextVar #toggle the state of the big text variable
+    print(bigTextVar)
+
+
 ##############################
 #  END FUNCTION DEFINITIONS  #
 ##############################
 
-list2 = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-disp = random.choice(list2)
 
 #root window
 root = Tk()
@@ -67,7 +90,7 @@ filemenu.add_command(label='Save Data', command=file_save)
     #Add submenu
 submenu = Menu(filemenu, tearoff=False, selectcolor='red')
 submenu.add_checkbutton(label='Display Graph')
-submenu.add_checkbutton(label='BIG TEXT')
+submenu.add_checkbutton(label='BIG TEXT', command=bigText)
 submenu.add_command(label='Measurement Config')
 submenu.add_command(label='Data Capture Config')
 filemenu.add_cascade(label='Preferences', menu=submenu)
@@ -90,19 +113,17 @@ helpmenu.add_command(label='About', command=launchdocumentation)
 my_button = Button(root, text="Graph it", command=graph)
 my_button.pack()
 
-start_button = Button(root, text="Start")
-stop_button = Button(root, text="Stop")
+start_button = Button(root, text="Start", command=startPowerReading)
 start_button.pack()
+stop_button = Button(root, text="Stop", command=stopPowerReading)
 stop_button.pack()
 
-powerData = np.random.normal(0, 30, 1)
-powerDataDisp = Label(root, text=powerData)
+
+powerDataDisp = Label(root)
 powerDataDisp.pack()
 
-root.after(10)
-powerDataDisp.update()
 
-
+root.after(updateTime, updatePowerDataDisp) #Start running the power display updater   
 
 root.mainloop() 
 
